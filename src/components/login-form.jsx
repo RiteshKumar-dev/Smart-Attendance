@@ -1,4 +1,5 @@
 'use client';
+
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
 export function LoginForm({ className, ...props }) {
-  const setToken = useAuthStore((state) => state.setToken);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -25,18 +26,24 @@ export function LoginForm({ className, ...props }) {
 
     try {
       const { data } = await axios.post('/api/login', { email, password });
-      // Store token globally
-      setToken(data.token);
-      localStorage.setItem('token', data.token);
+
+      // ✅ Store token (and user if available) in Zustand
+      setAuth({
+        token: data.token,
+        user: data.user || null, // fallback if backend doesn't send user
+      });
+
       setMessage('Login successful!');
       e.target.reset();
-      router.push('/'); // redirect to homepage/dashboard
+
+      router.push('/'); // redirect to dashboard/homepage
     } catch (error) {
       setMessage(error.response?.data?.error || 'Something went wrong.');
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <form className={cn('flex flex-col gap-6', className)} onSubmit={handleSubmit} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
@@ -49,7 +56,7 @@ export function LoginForm({ className, ...props }) {
       <div className="grid gap-6">
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" name="email" type="email" placeholder="m@example.com" required />
         </div>
 
         <div className="grid gap-3">
@@ -62,7 +69,7 @@ export function LoginForm({ className, ...props }) {
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" name="password" type="password" required />
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>

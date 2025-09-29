@@ -23,9 +23,24 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
     }
 
+    // 🔹 Token generate
     const token = signToken({ id: user._id, email: user.email });
 
-    return new Response(JSON.stringify({ message: 'Login successful', token }), { status: 200 });
+    // 🔹 Token DB me store
+    user.token = token;
+    await user.save();
+
+    return new Response(
+      JSON.stringify({
+        message: 'Login successful',
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+        },
+      }),
+      { status: 200 }
+    );
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }

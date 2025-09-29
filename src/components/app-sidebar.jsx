@@ -42,27 +42,27 @@ const data = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '#',
+      url: '/',
       icon: IconDashboard,
     },
     {
       title: 'Lifecycle',
-      url: '#',
+      url: '/lifecycle',
       icon: IconListDetails,
     },
     {
       title: 'Analytics',
-      url: '#',
+      url: '/analytics',
       icon: IconChartBar,
     },
     {
       title: 'Projects',
-      url: '#',
+      url: '/projects',
       icon: IconFolder,
     },
     {
       title: 'Team',
-      url: '#',
+      url: '/team',
       icon: IconUsers,
     },
   ],
@@ -75,26 +75,26 @@ const data = {
       items: [
         {
           title: 'Active Proposals',
-          url: '#',
+          url: '/ActiveProposals',
         },
         {
           title: 'Archived',
-          url: '#',
+          url: '/ArchivedProposals',
         },
       ],
     },
     {
       title: 'Proposal',
       icon: IconFileDescription,
-      url: '#',
+      url: '/Proposal',
       items: [
         {
           title: 'Active Proposals',
-          url: '#',
+          url: '/ActiveProposals',
         },
         {
           title: 'Archived',
-          url: '#',
+          url: '/ArchivedProposals',
         },
       ],
     },
@@ -157,7 +157,7 @@ export function AppSidebar({ ...props }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
+              <a href="/">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">Smart Attendance</span>
               </a>

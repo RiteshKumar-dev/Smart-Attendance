@@ -10,7 +10,12 @@ export default function Home() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const [notification, setNotification] = useState('');
-  const isRegistrationDone = localStorage.getItem('RegistrationSuccess') === 'true';
+  const [isRegistrationDone, setIsRegistrationDone] = useState(false);
+
+  useEffect(() => {
+    const regStatus = localStorage.getItem('RegistrationSuccess') === 'true';
+    setIsRegistrationDone(regStatus);
+  }, []);
 
   // Handler for opening the modal
   const handleLaunchClick = (e) => {

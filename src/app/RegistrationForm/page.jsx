@@ -13,7 +13,6 @@ import { useAuthStore } from '@/store/authStore';
 const mockSubmit = async (data, role) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log(`Submitting data for ${role}:`, data);
       if (data.name.toLowerCase().includes('error')) {
         reject({
           response: { data: { error: 'Registration failed due to server error. Try again.' } },
@@ -106,7 +105,6 @@ export default function RegisterPage() {
       }
     } catch (error) {
       setMessage(error.response?.data?.error || 'Something went wrong. Check console for details.');
-      console.error('Submission Error:', error);
     } finally {
       setLoading(false);
     }

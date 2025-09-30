@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react'; // Added useState
+import React, { useState, useEffect } from 'react'; // Added useState
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Using useRouter for navigation

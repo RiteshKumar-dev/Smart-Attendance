@@ -1,8 +1,9 @@
 'use client';
-import React, { useState, useEffect } from 'react'; // Added useState
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Using useRouter for navigation
+import { useRouter } from 'next/navigation';
+// NOTE: Assuming useAuthStore is available globally or imported correctly
 import { useAuthStore } from '@/store/authStore';
 
 export default function Home() {
@@ -12,27 +13,35 @@ export default function Home() {
   const [notification, setNotification] = useState('');
   const [isRegistrationDone, setIsRegistrationDone] = useState(false);
 
+  // Custom Hook for mounting animation
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    // Check registration status from localStorage
     const regStatus = localStorage.getItem('RegistrationSuccess') === 'true';
     setIsRegistrationDone(regStatus);
+    setIsMounted(true); // For initial mount transition
   }, []);
 
   // Handler for opening the modal
   const handleLaunchClick = (e) => {
     e.preventDefault(); // Prevent default navigation
+
     if (!isAuthenticated) {
-      // ❌ No token → redirect to login
-      router.push('/login');
-      return;
-    }
-    if (!isRegistrationDone) {
-      // ❌ Registration not done → show notification
-      setNotification('⚠️ Please complete your registration before accessing dashboard.');
-      setTimeout(() => setNotification(''), 3000); // 3 sec baad notification hat jayega
+      // ❌ No token → redirect to login and show persistent error style
+      setNotification('❌ You need to login first to access the dashboard.');
+      setTimeout(() => router.push('/login'), 1500);
       return;
     }
 
-    // ✅ If logged in → open role modal
+    if (!isRegistrationDone) {
+      // ❌ Registration not done → show notification
+      setNotification('⚠️ Please complete your registration before accessing the dashboard.');
+      setTimeout(() => setNotification(''), 4000); // 4 sec baad notification hat jayega
+      return;
+    }
+
+    // ✅ If logged in & registered → open role modal
     setShowRoleModal(true);
   };
 
@@ -47,78 +56,97 @@ export default function Home() {
     router.push('/dashboard');
   };
 
-  // Role Selection Modal Component
+  // Role Selection Modal Component (Enhanced UI)
   const RoleSelectionModal = () => {
     if (!showRoleModal) return null;
 
     return (
-      // Modal Overlay
+      // Modal Overlay: Darkened, blurred background for better focus
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70 transition-opacity"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80 transition-opacity backdrop-blur-sm"
         aria-modal="true"
         role="dialog"
       >
-        {/* Modal Panel */}
-        <div className="bg-white p-6 sm:p-10 w-full max-w-md m-4 transform transition-all scale-100 ease-out duration-300">
-          <h2 className="text-3xl font-extrabold text-indigo-700 mb-4 text-center">
-            Select Your Role
-          </h2>
-          <p className="text-gray-600 text-center mb-8">
-            Please choose your role to access the relevant dashboard experience.
-          </p>
+        {/* Modal Panel: Modern card design */}
+        <div className="bg-white rounded-2xl shadow-3xl p-8 w-full max-w-sm m-4 transform transition-all scale-100 ease-out duration-300 border border-indigo-100">
+          <div className="flex flex-col items-center">
+            <svg
+              className="h-10 w-10 text-indigo-600 mb-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12h6m-6 4h6m-5 3h4m5 0h2m-2-6h2m-2-2h2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z"
+              />
+            </svg>
+            <h2 className="text-2xl font-extrabold text-gray-800 mb-2 text-center">
+              Select Your Dashboard View
+            </h2>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Your role determines the features you can access.
+            </p>
+          </div>
 
           <div className="flex flex-col space-y-4">
-            {/* Teacher Role Button */}
+            {/* Teacher Role Button - Primary Action Style */}
             <button
               onClick={() => handleRoleSelect('Teacher')}
-              className="group flex items-center justify-center p-4 border border-indigo-300 rounded-xl shadow-lg 
-                         bg-indigo-600 text-white hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-[1.02] active:scale-[1.00]"
+              className="group flex items-center p-4 border border-indigo-500 rounded-xl shadow-md 
+                         bg-indigo-600 text-white hover:bg-indigo-700 transition duration-300 transform hover:shadow-lg"
             >
-              <span className="text-xl font-bold">
-                <span role="img" aria-label="Teacher icon" className="mr-3 text-2xl">
-                  🧑‍🏫
-                </span>
-                Teacher Access
+              <span className="text-2xl mr-4" role="img" aria-label="Teacher icon">
+                🧑‍🏫
               </span>
+              <span className="text-lg font-bold">Teacher/Admin Access</span>
             </button>
 
-            {/* Student Role Button */}
+            {/* Student Role Button - Secondary Action Style */}
             <button
               onClick={() => handleRoleSelect('Student')}
-              className="group flex items-center justify-center p-4 border border-gray-300 rounded-xl shadow-lg 
-                         bg-white text-gray-800 hover:bg-gray-100 transition duration-300 ease-in-out transform hover:scale-[1.02] active:scale-[1.00]"
+              className="group flex items-center p-4 border border-gray-300 rounded-xl shadow-md 
+                         bg-white text-gray-800 hover:bg-gray-50 transition duration-300 transform hover:shadow-lg"
             >
-              <span className="text-xl font-bold">
-                <span role="img" aria-label="Student icon" className="mr-3 text-2xl">
-                  🧑‍🎓
-                </span>
-                Student View
+              <span className="text-2xl mr-4" role="img" aria-label="Student icon">
+                🧑‍🎓
               </span>
+              <span className="text-lg font-bold">Student View Portal</span>
             </button>
           </div>
 
-          {/* Close Button/Hint */}
-          <button
-            onClick={() => setShowRoleModal(false)}
-            className="mt-6 w-full text-sm font-medium text-gray-500 hover:text-indigo-600 transition duration-150"
-            aria-label="Close role selection dialog"
-          >
-            Cancel
-          </button>
+          <div className="border-t border-gray-100 mt-6 pt-4">
+            <button
+              onClick={() => setShowRoleModal(false)}
+              className="w-full text-sm font-medium text-gray-500 hover:text-indigo-600 transition duration-150"
+              aria-label="Close role selection dialog"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     );
   };
 
-  // The Home component now only renders the static hero content.
+  // Determine notification style
+  const notificationStyle = notification.includes('⚠️')
+    ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+    : 'bg-red-100 text-red-700 border-red-400';
+
   return (
-    <main className="bg-white">
-      {/* 🔔 Notification */}
+    <main className="min-h-screen bg-gray-50">
+      {/* 🔔 Floating Notification (Toast) */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg shadow-md text-sm font-medium">
+        <div
+          className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl shadow-xl text-sm font-medium transition-all duration-300 ease-in-out border ${notificationStyle}`}
+        >
           {notification}
         </div>
       )}
+
       {/* Role Selection Modal */}
       <RoleSelectionModal />
 
@@ -162,7 +190,7 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 pt-5">
-              {/* MODIFIED: Changed Link to use handleLaunchClick and is now a button */}
+              {/* Primary CTA: Launch Dashboard */}
               <button
                 onClick={handleLaunchClick}
                 className="inline-flex items-center justify-center px-9 py-4 border border-transparent text-lg font-bold rounded-full shadow-xl text-white bg-indigo-700 hover:bg-indigo-800 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
@@ -173,10 +201,12 @@ export default function Home() {
                 </svg>
               </button>
 
-              <Link href="/RegistrationForm" legacyBehavior>
-                <a className="inline-flex items-center px-9 py-4 border border-gray-300 text-lg font-medium rounded-full shadow-md text-gray-900 bg-white hover:bg-gray-100 transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                  Registration
-                </a>
+              {/* Secondary CTA: Registration */}
+              <Link
+                href="/RegistrationForm"
+                className="inline-flex items-center px-9 py-4 border border-gray-300 text-lg font-medium rounded-full shadow-md text-gray-900 bg-white hover:bg-gray-100 transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                Registration
               </Link>
             </div>
           </div>
@@ -208,6 +238,8 @@ export default function Home() {
             {/* Mobile fallback: visual illustration */}
             <div className="flex justify-center lg:hidden">
               <div className="w-full max-w-xs">
+                {/* NOTE: You should replace the placeholder image path /SmartAttendanceImage.png 
+                         with a real, relevant illustration in your project. */}
                 <Image
                   src="/SmartAttendanceImage.png"
                   alt="Attendance system illustration"

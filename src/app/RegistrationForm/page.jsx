@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 
 // NOTE: Assuming '@/components/ui/button', '@/components/ui/input', '@/components/ui/label' exist
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,12 @@ export default function RegisterPage() {
   const router = useRouter();
   const [teacherSubjects, setTeacherSubjects] = useState(['']);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+
+  useEffect(() => {
+    if (role) {
+      localStorage.setItem('userRole', role);
+    }
+  }, [role]);
 
   // Reset form fields on role change
   const handleBack = () => {
@@ -66,7 +73,7 @@ export default function RegisterPage() {
     let endpointRole;
 
     if (role === 'teacher') {
-      endpointRole = 'teacher';
+      endpointRole = '/api/teacher';
       payload = {
         name: data.name,
         teacherId: data.teacherId,
@@ -74,7 +81,7 @@ export default function RegisterPage() {
         subjects: teacherSubjects.filter((s) => s.trim() !== ''),
       };
     } else {
-      endpointRole = 'student';
+      endpointRole = '/api/student';
       payload = {
         name: data.name,
         email: data.email,
@@ -86,10 +93,10 @@ export default function RegisterPage() {
         domain: data.domain,
       };
     }
-
+    const endpoint = role === 'teacher' ? '/api/teacher' : '/api/student';
     try {
       // Replaced actual axios call with mockSubmit
-      const res = await mockSubmit(payload, endpointRole);
+      const res = await axios.post(endpoint, payload);
       setMessage(res.data.message);
 
       // Clear form after successful submission
